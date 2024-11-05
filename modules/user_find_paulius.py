@@ -1,18 +1,22 @@
 from sqlalchemy import select
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
+from sqlalchemy import or_
+ 
 
-engine = create_engine('sqlite:///example.db') 
+engine = create_engine('sqlite:///app.db') 
 Session = sessionmaker(bind=engine)
 session = Session()
 
 from db_classes import User
 
 def Find_user(email):
-        stmt = select(User).where(User.email == email)
+        stmt = select(User).where( or_(User.email == email, User.username == email)
+)
         return session.execute(stmt).scalars().first()  
        
 
-users = Find_user("a@a.com")
-for user in users:
-    print(f"Naudotojas: {user.first_name} {user.last_name}")
+user = Find_user("amy97")
+print(f"Naudotojas: {user.first_name}")
+
+
