@@ -81,8 +81,19 @@ class Participant(Base):
 
 
 # kita klase
+# ---------------- PK ----------------
+class Skill(Base):
+    __tablename__ = "skills"
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    title = Column(String(255))
+    description = Column(String(255))
+    user = relationship("User", back_populates="skills")
 
-# .....
+    def __repr__(self):
+        return f"Skill_{self.id},{self.user_id} {self.title}, aprašymas: {self.description}"
+
+    # ---------------- end of PK ----------------
 
 # n-toji klase
 
