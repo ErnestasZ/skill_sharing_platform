@@ -125,6 +125,7 @@ with session_factory() as session:
 #     session.commit()
 # ---------------- end of JS ----------------
 
+<<<<<<< Updated upstream
 # engine = create_engine('sqlite:///app.db')
 # Base.metadata.create_all(engine)
 # Session = sessionmaker(bind=engine)
@@ -134,3 +135,28 @@ with session_factory() as session:
 #     session.commit()
     
 #     print(new_participant)
+=======
+
+
+
+#skirmante lectures
+
+class Lectures (Base):
+    __tablename__ = "lectures"
+    id = Column(Integer, primary_key=True)
+    title = Column(String(255))
+    description = Column(String)
+    start_at = Column(DateTime)
+    end_at = Column(DateTime)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    skill_id = Column(Integer, ForeignKey("skills.id"))
+    
+    user = relationship("User", back_populates="lectures")
+    skill = relationship("Skill", back_populates="lectures")
+
+    def __repr__(self):
+        return (f"Lecture(id={self.id}, title={self.title}, start_at={self.start_at}, end_at={self.end_at}, user_id={self.user_id}, skill_id={self.skill_id} ")
+    
+
+
+>>>>>>> Stashed changes
