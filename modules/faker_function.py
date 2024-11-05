@@ -94,11 +94,14 @@ def create_participants(number):
     # participants = []
     with Session() as session:
         for _ in range(number):
-            users = session.execute(select(sql.User)).scalars().all()
-            user = random.choice(users)
-            lectures = session.execute(select(sql.Lecture).where(
-                sql.Lecture.user_id != user.id)).scalars().all()
-            lecture = random.choice(lectures)
+            while True:
+                users = session.execute(select(sql.User)).scalars().all()
+                user = random.choice(users)
+                lectures = session.execute(select(sql.Lecture).where(
+                    sql.Lecture.user_id != user.id)).scalars().all()
+                lecture = random.choice(lectures)
+                if user.id != lecture.user_id:
+                    break
 
             if lecture.end_at < datetime.now():
                 completed = False
