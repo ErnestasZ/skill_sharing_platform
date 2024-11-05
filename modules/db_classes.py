@@ -5,13 +5,15 @@ from datetime import date
 from datetime import datetime
 
 from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, DATE, ForeignKey, not_, and_, or_, Boolean
-from sqlalchemy.orm import DeclarativeBase, declarative_base, relationship, sessionmaker, attributes #, session
+from sqlalchemy.orm import DeclarativeBase, declarative_base, relationship, sessionmaker, attributes  # , session
 from typing_extensions import Annotated
 
 # class Base(DeclarativeBase):
 #     pass
 # or
+engine = create_engine('sqlite:///app.db')
 Base = declarative_base()
+
 
 class User(Base):
     __tablename__ = "users"
@@ -20,8 +22,13 @@ class User(Base):
     last_name = Column(String(25))
     email = Column(String(50), unique=True)
     username = Column(String(10), unique=True)
-    password = Column(String(64)) #sha-256
-    auths = relationship("Authorization", back_populates="user", cascade="all, delete")
+    password = Column(String(64))  # sha-256
+    auths = relationship(
+        "Authorization", back_populates="user", cascade="all, delete")
+    skills = relationship("Skill", back_populates="user")
+    lectures = relationship("Lecture", back_populates="user")
+    participants = relationship("Participant", back_populates="user")
+    part_lectures = relationship("Lectures", secondary='participants', back_populates="part_users")
 
     # def __init__(self, first_name: str, last_name: str, email: str, username: str, password: str) -> None:
     #     self.first_name = first_name
@@ -32,6 +39,7 @@ class User(Base):
 
     def __repr__(self):
         return f"User_{self.id}: {self.first_name} {self.last_name}, email: {self.email}"
+
 
 class Authorization(Base):
     __tablename__ = "auths"
@@ -47,9 +55,12 @@ class Authorization(Base):
 
     def __repr__(self):
         return f"{self.user}, login: {self.login}, logout: {self.logout}"
+
+
 # ---------------- end of JS ----------------
 # -----------------RB --------------------------------
-Base = declarative_base()
+# Base = declarative_base()
+
 
 class Participant(Base):
     __tablename__ = "participants"
@@ -61,23 +72,13 @@ class Participant(Base):
     subscribed_at = Column(DateTime, default=datetime.now())
 
     user = relationship("User", back_populates="participants")
-    
+    lecture = relationship("Lecture", back_populates="participans")
 
     def __repr__(self):
         return (f"<Participant(id={self.id}, lecture_id={self.lecture_id}, user_id={self.user_id}, "
-                f"is_complete={self.is_complete}, lecture_rating={self.lecture_rating}, "
+                f"is_complete={self.is_complete}, lecture_rating={
+                    self.lecture_rating}, "
                 f"subscribed_at={self.subscribed_at})>")
-    
-
-
-
-
-
-
-
-
-
-
 
 
 # kita klase
@@ -89,57 +90,13 @@ class Skill(Base):
     title = Column(String(255))
     description = Column(String(255))
     user = relationship("User", back_populates="skills")
+    lectures = relationship("Skill", back_populates="skill")
 
     def __repr__(self):
         return f"Skill_{self.id},{self.user_id} {self.title}, aprašymas: {self.description}"
 
     # ---------------- end of PK ----------------
 
-# n-toji klase
-
-# ------------------- JS --------------------
-engine = create_engine('sqlite:///app.db')
-Base.metadata.create_all(engine)
-
-session_factory = sessionmaker(bind=engine)
-
-print(f"Add records at {datetime.now()}")
-with session_factory() as session:
-    new_user = User(first_name="Jonas", last_name="Jonaitis", email="john@mail.com", username="johnjon", password="031edd7d41651593c5fe5c006fa5752b37fddff7bc4e843aa6af0c950f4b9406")
-    auth1 = Authorization(login=datetime.now(), user=new_user)
-    auth2 = Authorization(login=datetime.now(), user=new_user)
-
-    session.add(new_user)
-    session.add(auth1)
-    session.add(auth2)
-    session.commit()
-    
-    print(new_user)
-    print(auth2)
-
-# print(f"Delete records at {datetime.now()}")
-# with session_factory() as session:
-
-#     session.delete(auth1)
-#     session.delete(new_user)
-#     session.commit()
-# ---------------- end of JS ----------------
-
-<<<<<<< Updated upstream
-# engine = create_engine('sqlite:///app.db')
-# Base.metadata.create_all(engine)
-# Session = sessionmaker(bind=engine)
-# with Session() as session:
-#     new_participant = Participant(lecture_id=1, user_id=1, is_complete=True, lecture_rating=5)
-#     session.add(new_participant)
-#     session.commit()
-    
-#     print(new_participant)
-=======
-
-
-
-#skirmante lectures
 
 class Lectures (Base):
     __tablename__ = "lectures"
@@ -150,13 +107,51 @@ class Lectures (Base):
     end_at = Column(DateTime)
     user_id = Column(Integer, ForeignKey("users.id"))
     skill_id = Column(Integer, ForeignKey("skills.id"))
-    
+
     user = relationship("User", back_populates="lectures")
     skill = relationship("Skill", back_populates="lectures")
+    participants = relationship("Participant", back_populates="lecture")
+    part_users = relationship("Lectures", secondary='participants', back_populates="part_lectures")
+
+
 
     def __repr__(self):
         return (f"Lecture(id={self.id}, title={self.title}, start_at={self.start_at}, end_at={self.end_at}, user_id={self.user_id}, skill_id={self.skill_id} ")
-    
 
 
->>>>>>> Stashed changes
+# n-toji klase
+
+
+# ------------------- JS --------------------
+# engine = create_engine('sqlite:///app.db')
+# Base.metadata.create_all(engine)
+
+# session_factory = sessionmaker(bind=engine)
+
+# print(f"Add records at {datetime.now()}")
+# with session_factory() as session:
+#     new_user = User(first_name="Jonas", last_name="Jonaitis", email="john@mail.com", username="johnjon",
+#                     password="031edd7d41651593c5fe5c006fa5752b37fddff7bc4e843aa6af0c950f4b9406")
+#     auth1 = Authorization(login=datetime.now(), user=new_user)
+#     auth2 = Authorization(login=datetime.now(), user=new_user)
+
+#     session.add(new_user)
+#     session.add(auth1)
+#     session.add(auth2)
+#     session.commit()
+
+#     print(new_user)
+#     print(auth2)
+
+# print(f"Delete records at {datetime.now()}")
+# with session_factory() as session:
+
+#     session.delete(auth1)
+#     session.delete(new_user)
+#     session.commit()
+# ---------------- end of JS ----------------
+
+# skirmante lectures
+
+
+Base.metadata.create_all(engine)
