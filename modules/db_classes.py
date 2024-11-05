@@ -28,7 +28,8 @@ class User(Base):
     skills = relationship("Skill", back_populates="user")
     lectures = relationship("Lecture", back_populates="user")
     participants = relationship("Participant", back_populates="user")
-    part_lectures = relationship("Lectures", secondary='participants', back_populates="part_users")
+    # part_lectures = relationship(
+    #     "Lecture", secondary='participants', back_populates="part_users")
 
     # def __init__(self, first_name: str, last_name: str, email: str, username: str, password: str) -> None:
     #     self.first_name = first_name
@@ -72,7 +73,7 @@ class Participant(Base):
     subscribed_at = Column(DateTime, default=datetime.now())
 
     user = relationship("User", back_populates="participants")
-    lecture = relationship("Lecture", back_populates="participans")
+    lecture = relationship("Lecture", back_populates="participants")
 
     def __repr__(self):
         return (f"<Participant(id={self.id}, lecture_id={self.lecture_id}, user_id={self.user_id}, "
@@ -90,7 +91,7 @@ class Skill(Base):
     title = Column(String(255))
     description = Column(String(255))
     user = relationship("User", back_populates="skills")
-    lectures = relationship("Skill", back_populates="skill")
+    lectures = relationship("Lecture", back_populates="skill")
 
     def __repr__(self):
         return f"Skill_{self.id},{self.user_id} {self.title}, aprašymas: {self.description}"
@@ -98,7 +99,7 @@ class Skill(Base):
     # ---------------- end of PK ----------------
 
 
-class Lectures (Base):
+class Lecture(Base):
     __tablename__ = "lectures"
     id = Column(Integer, primary_key=True)
     title = Column(String(255))
@@ -111,9 +112,8 @@ class Lectures (Base):
     user = relationship("User", back_populates="lectures")
     skill = relationship("Skill", back_populates="lectures")
     participants = relationship("Participant", back_populates="lecture")
-    part_users = relationship("Lectures", secondary='participants', back_populates="part_lectures")
-
-
+    # part_users = relationship(
+    #     "User", secondary='participants', back_populates="part_lectures")
 
     def __repr__(self):
         return (f"Lecture(id={self.id}, title={self.title}, start_at={self.start_at}, end_at={self.end_at}, user_id={self.user_id}, skill_id={self.skill_id} ")

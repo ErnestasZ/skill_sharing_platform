@@ -16,24 +16,29 @@ Session = sessionmaker(bind=engine)
 
 
 def create_users(number):
-    users = []
+    # users = []
 
     with Session() as session:
         for _ in range(number):
             user = sql.User(
-                name=fake.name(),
+                first_name=fake.name(),
+                last_name=fake.name(),
+                username=fake.unique.user_name(),
                 email=fake.unique.email(),
                 password=bcrypt.hashpw(DEFAULT_PASSWORD.encode(), salt)
             )
-            # skills = create_skills()
-            # user_skills = []
-            # for skill in create_skills():
-            #     user_skills.append(
-            #         sql.Skill(title=skill, description=fake.paragraph(nb_sentences=3)))
-            skill = create_skill()
-            lecture = create_lecture(skill)
 
-    return users
+            skill = create_skill()
+            user.skills.append(skill)
+            session.add(user)
+            session.commit()
+            print(user.id, skill.id)
+            # return
+            lecture = create_lecture(skill)
+            session.add(lecture)
+            session.commit()
+
+    # return users
 
 
 def create_skill():
@@ -76,6 +81,8 @@ def create_lecture(skill):
     final_start_at = datetime.combine(generate_date, time(9, 0))
 
     return sql.Lecture(
+        skill_id=skill.id,
+        user_id=skill.user_id,
         title=lectures_title,
         description=fake.paragraph(nb_sentences=3),
         start_at=final_start_at,
@@ -83,27 +90,42 @@ def create_lecture(skill):
     )
 
 
-def create_participants():
-    participants = []
+def create_participants(number):
+    # participants = []
     with Session() as session:
-        for _ in range(100):
+        for _ in range(number):
             users = session.execute(select(sql.User)).scalars().all()
             user = random.choice(users)
             lectures = session.execute(select(sql.Lecture).where(
                 sql.Lecture.user_id != user.id)).scalars().all()
             lecture = random.choice(lectures)
-            participan = session.execute(sql.Patricipan.insert().values(
-                user_id=user.id, lecture_id=lecture.id))
+
+            if lecture.end_at < datetime.now():
+                completed = False
+                rating = False
+            else:
+                completed = True
+                rating = True
+
+            participan = sql.Participant(
+                user_id=user.id,
+                lecture_id=lecture.id,
+                is_complete=completed,
+                lecture_rating=rating,
+                subscribed_at=lecture.start_at -
+                timedelta(days=random.randint(1, 3))
+            )
+            session.add(participan)
+            session.commit()
             # sql.Participant(user_id=user.id, lecture_id=lecture.id)
             # )
-    return participants
+
+# create_users(5)
 
 
-# create_lectures('Python')
-start_date_str = '2024-10-01'
-end_date_str = '2024-12-01'
-start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
-end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
-generate_date = fake.date_between_dates(start_date, end_date)
-final_start_at = datetime.combine(generate_date, time(9, 0))
-print(final_start_at + timedelta(hours=random.randint(1, 4)))
+def fill_db():
+    create_users(15)
+    create_participants(10)
+
+
+fill_db()
