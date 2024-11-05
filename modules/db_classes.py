@@ -4,7 +4,7 @@ import datetime as dt
 from datetime import date
 from datetime import datetime
 
-from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, DATE, ForeignKey, not_, and_, or_
+from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, DATE, ForeignKey, not_, and_, or_, Boolean
 from sqlalchemy.orm import DeclarativeBase, declarative_base, relationship, sessionmaker, attributes #, session
 from typing_extensions import Annotated
 
@@ -48,6 +48,37 @@ class Authorization(Base):
     def __repr__(self):
         return f"{self.user}, login: {self.login}, logout: {self.logout}"
 # ---------------- end of JS ----------------
+# -----------------RB --------------------------------
+Base = declarative_base()
+
+class Participant(Base):
+    __tablename__ = "participants"
+    id = Column(Integer, primary_key=True)
+    lecture_id = Column(Integer, ForeignKey("lectures.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    is_complete = Column(Boolean, default=False)
+    lecture_rating = Column(Boolean, default=False)
+    subscribed_at = Column(DateTime, default=datetime.now())
+
+    user = relationship("User", back_populates="participants")
+    
+
+    def __repr__(self):
+        return (f"<Participant(id={self.id}, lecture_id={self.lecture_id}, user_id={self.user_id}, "
+                f"is_complete={self.is_complete}, lecture_rating={self.lecture_rating}, "
+                f"subscribed_at={self.subscribed_at})>")
+    
+
+
+
+
+
+
+
+
+
+
+
 
 # kita klase
 
@@ -82,3 +113,13 @@ with session_factory() as session:
 #     session.delete(new_user)
 #     session.commit()
 # ---------------- end of JS ----------------
+
+# engine = create_engine('sqlite:///app.db')
+# Base.metadata.create_all(engine)
+# Session = sessionmaker(bind=engine)
+# with Session() as session:
+#     new_participant = Participant(lecture_id=1, user_id=1, is_complete=True, lecture_rating=5)
+#     session.add(new_participant)
+#     session.commit()
+    
+#     print(new_participant)
