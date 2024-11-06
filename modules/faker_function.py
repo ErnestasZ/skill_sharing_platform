@@ -6,6 +6,7 @@ from datetime import datetime, time, timedelta
 from sqlalchemy import create_engine, insert, select
 from sqlalchemy.orm import sessionmaker
 import db_classes as sql
+import hashlib #-JS
 
 
 salt = bcrypt.gensalt()
@@ -25,7 +26,8 @@ def create_users(number):
                 last_name=fake.last_name(),
                 username=fake.unique.user_name(),
                 email=fake.unique.email(),
-                password=bcrypt.hashpw(DEFAULT_PASSWORD.encode(), salt)
+                password=hashlib.sha256(DEFAULT_PASSWORD.encode()).hexdigest() #-JS
+                #password=bcrypt.hashpw(DEFAULT_PASSWORD.encode(), salt) #-JS
             )
 
             skill = create_skill()

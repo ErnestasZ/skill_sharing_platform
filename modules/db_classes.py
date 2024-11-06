@@ -1,19 +1,16 @@
 import datetime as dt
 
-# ------------------- JS --------------------
 from datetime import date
 from datetime import datetime
 
-from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, DATE, ForeignKey, not_, and_, or_, Boolean
+from sqlalchemy import create_engine, Column, Boolean, Integer, Float, String, DateTime, DATE, ForeignKey, select, not_, and_, or_
 from sqlalchemy.orm import DeclarativeBase, declarative_base, relationship, sessionmaker, attributes  # , session
 from typing_extensions import Annotated
 
 # class Base(DeclarativeBase):
 #     pass
 # or
-engine = create_engine('sqlite:///app.db')
 Base = declarative_base()
-
 
 class User(Base):
     __tablename__ = "users"
@@ -41,7 +38,6 @@ class User(Base):
     def __repr__(self):
         return f"User_{self.id}: {self.first_name} {self.last_name}, email: {self.email}"
 
-
 class Authorization(Base):
     __tablename__ = "auths"
     id = Column("id", Integer, primary_key=True)
@@ -56,12 +52,6 @@ class Authorization(Base):
 
     def __repr__(self):
         return f"{self.user}, login: {self.login}, logout: {self.logout}"
-
-
-# ---------------- end of JS ----------------
-# -----------------RB --------------------------------
-# Base = declarative_base()
-
 
 class Participant(Base):
     __tablename__ = "participants"
@@ -81,9 +71,6 @@ class Participant(Base):
                     self.lecture_rating}, "
                 f"subscribed_at={self.subscribed_at})>")
 
-
-# kita klase
-# ---------------- PK ----------------
 class Skill(Base):
     __tablename__ = "skills"
     id = Column(Integer, primary_key=True)
@@ -95,9 +82,6 @@ class Skill(Base):
 
     def __repr__(self):
         return f"Skill_{self.id},{self.user_id} {self.title}, aprašymas: {self.description}"
-
-    # ---------------- end of PK ----------------
-
 
 class Lecture(Base):
     __tablename__ = "lectures"
@@ -118,40 +102,16 @@ class Lecture(Base):
     def __repr__(self):
         return (f"Lecture(id={self.id}, title={self.title}, start_at={self.start_at}, end_at={self.end_at}, user_id={self.user_id}, skill_id={self.skill_id} ")
 
-
-# n-toji klase
-
-
-# ------------------- JS --------------------
-# engine = create_engine('sqlite:///app.db')
-# Base.metadata.create_all(engine)
-
-# session_factory = sessionmaker(bind=engine)
-
-# print(f"Add records at {datetime.now()}")
-# with session_factory() as session:
-#     new_user = User(first_name="Jonas", last_name="Jonaitis", email="john@mail.com", username="johnjon",
-#                     password="031edd7d41651593c5fe5c006fa5752b37fddff7bc4e843aa6af0c950f4b9406")
-#     auth1 = Authorization(login=datetime.now(), user=new_user)
-#     auth2 = Authorization(login=datetime.now(), user=new_user)
-
-#     session.add(new_user)
-#     session.add(auth1)
-#     session.add(auth2)
-#     session.commit()
-
-#     print(new_user)
-#     print(auth2)
-
-# print(f"Delete records at {datetime.now()}")
-# with session_factory() as session:
-
-#     session.delete(auth1)
-#     session.delete(new_user)
-#     session.commit()
-# ---------------- end of JS ----------------
-
-# skirmante lectures
-
-
+engine = create_engine('sqlite:///app.db')
 Base.metadata.create_all(engine)
+
+session_factory = sessionmaker(bind=engine)
+
+def get_user(login: str, session = session_factory()):
+    stmt = select(User).where(or_(User.username == login, User.email == login))
+    return session.execute(stmt).scalars().first()
+
+def add_user(session = session_factory(), **kwargs):
+    new_user = User(**kwargs)
+    session.add(new_user)
+    session.commit()
