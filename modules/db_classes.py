@@ -118,8 +118,8 @@ def get_user(login: str, session=session_factory()):
     stmt = select(User).where(or_(User.username == login, User.email == login))
     return session.execute(stmt).scalars().first()
 
-
-def add_user(session=session_factory(), **kwargs):
+def add_user(session = session_factory(), **kwargs) -> User:
     new_user = User(**kwargs)
     session.add(new_user)
     session.commit()
+    return new_user
