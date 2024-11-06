@@ -12,6 +12,7 @@ from typing_extensions import Annotated
 # or
 Base = declarative_base()
 
+
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True)
@@ -38,6 +39,7 @@ class User(Base):
     def __repr__(self):
         return f"User_{self.id}: {self.first_name} {self.last_name}, email: {self.email}"
 
+
 class Authorization(Base):
     __tablename__ = "auths"
     id = Column("id", Integer, primary_key=True)
@@ -52,6 +54,7 @@ class Authorization(Base):
 
     def __repr__(self):
         return f"{self.user}, login: {self.login}, logout: {self.logout}"
+
 
 class Participant(Base):
     __tablename__ = "participants"
@@ -71,6 +74,7 @@ class Participant(Base):
                     self.lecture_rating}, "
                 f"subscribed_at={self.subscribed_at})>")
 
+
 class Skill(Base):
     __tablename__ = "skills"
     id = Column(Integer, primary_key=True)
@@ -83,6 +87,7 @@ class Skill(Base):
     def __repr__(self):
         return f"Skill_{self.id},{self.user_id} {self.title}, aprašymas: {self.description}"
 
+
 class Lecture(Base):
     __tablename__ = "lectures"
     id = Column(Integer, primary_key=True)
@@ -92,7 +97,7 @@ class Lecture(Base):
     end_at = Column(DateTime)
     user_id = Column(Integer, ForeignKey("users.id"))
     skill_id = Column(Integer, ForeignKey("skills.id"))
-
+    participants_qty = Column(Integer)
     user = relationship("User", back_populates="lectures")
     skill = relationship("Skill", back_populates="lectures")
     participants = relationship("Participant", back_populates="lecture")
@@ -102,16 +107,23 @@ class Lecture(Base):
     def __repr__(self):
         return (f"Lecture(id={self.id}, title={self.title}, start_at={self.start_at}, end_at={self.end_at}, user_id={self.user_id}, skill_id={self.skill_id} ")
 
+
 engine = create_engine('sqlite:///app.db')
 Base.metadata.create_all(engine)
 
 session_factory = sessionmaker(bind=engine)
 
-def get_user(login: str, session = session_factory()):
+
+def get_user(login: str, session=session_factory()):
     stmt = select(User).where(or_(User.username == login, User.email == login))
     return session.execute(stmt).scalars().first()
 
+<<<<<<< HEAD
 def add_user(session = session_factory(), **kwargs) -> User:
+=======
+
+def add_user(session=session_factory(), **kwargs):
+>>>>>>> 313d50312744a63f36a1ad51c6d23ad23f929dd9
     new_user = User(**kwargs)
     session.add(new_user)
     session.commit()
