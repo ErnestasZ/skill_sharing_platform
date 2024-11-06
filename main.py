@@ -23,6 +23,7 @@ def login():
     hash = calc_hash(password)
 
     if user and user.password == hash:
+        user.add_auth()
         session_state["auth_user"] = user
         result = True
 
@@ -81,7 +82,10 @@ def profile_menu() -> None:
 9. Paskaitos kuriose dalyvavau (išskirstytos - baigtos, nebaigtos). (user) Skirmante
 10. Įvertink paskaitas kuriose dalyvavai. (user, lecture) Skirmante Padaryta
 11. Baigti darba (atsijungti)  (atsijungimo metu paziureti ar dalyvauja ir ispeti jei taip, ar tikrai nori atsijungti.) (user) Raminta""")
+    
+    last_auth = session_state["auth_user"].last_auth()
     input("Profile menu")
+
     exit()
 
 def wellcome_menu() -> None:
