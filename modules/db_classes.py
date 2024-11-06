@@ -4,14 +4,31 @@ from datetime import date
 from datetime import datetime
 
 from sqlalchemy import create_engine, Column, Boolean, Integer, Float, String, DateTime, DATE, ForeignKey, select, not_, and_, or_
-from sqlalchemy.orm import DeclarativeBase, declarative_base, relationship, sessionmaker, attributes  # , session
+from sqlalchemy.orm import DeclarativeBase, Session, declarative_base, relationship, sessionmaker, attributes  # , session
 from typing_extensions import Annotated
+
+engine = create_engine('sqlite:///app.db')
+session_factory = sessionmaker(bind=engine)
 
 # class Base(DeclarativeBase):
 #     pass
 # or
 Base = declarative_base()
 
+class Authorization(Base):
+    __tablename__ = "auths"
+    id = Column("id", Integer, primary_key=True)
+    login = Column(DateTime)
+    logout = Column(DateTime)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    user = relationship("User", back_populates="auths")
+
+    # def __init__(self, login: datetime = None, logout: datetime = None) -> None:
+    #     self.login = login
+    #     self.logout = logout
+
+    def __repr__(self):
+        return f"{self.user}, login: {self.login}, logout: {self.logout}"
 
 class User(Base):
     __tablename__ = "users"
@@ -36,25 +53,22 @@ class User(Base):
     #     self.username = username
     #     self.password = password
 
+    def add_auth(self, session = session_factory()):
+        now = datetime.now()
+        auth = Authorization(login=now, logout=now, user_id=self.id)
+        session.add(auth)
+        session.commit()
+
+    def get_auths(self) -> list:
+        stmt = select(Authorization).where(Authorization.user_id == self.id)
+        return session_factory().execute(stmt).scalars().all()
+
+    def last_auth(self) -> (Authorization | None):
+        auths = sorted(self.get_auths(), key=lambda Authorization:Authorization.login, reverse=True)
+        return auths[0] if auths else None
+
     def __repr__(self):
         return f"User_{self.id}: {self.first_name} {self.last_name}, email: {self.email}"
-
-
-class Authorization(Base):
-    __tablename__ = "auths"
-    id = Column("id", Integer, primary_key=True)
-    login = Column(DateTime)
-    logout = Column(DateTime)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    user = relationship("User", back_populates="auths")
-
-    # def __init__(self, login: datetime = None, logout: datetime = None) -> None:
-    #     self.login = login
-    #     self.logout = logout
-
-    def __repr__(self):
-        return f"{self.user}, login: {self.login}, logout: {self.logout}"
-
 
 class Participant(Base):
     __tablename__ = "participants"
@@ -74,7 +88,6 @@ class Participant(Base):
                     self.lecture_rating}, "
                 f"subscribed_at={self.subscribed_at})>")
 
-
 class Skill(Base):
     __tablename__ = "skills"
     id = Column(Integer, primary_key=True)
@@ -86,7 +99,6 @@ class Skill(Base):
 
     def __repr__(self):
         return f"Skill_{self.id},{self.user_id} {self.title}, aprašymas: {self.description}"
-
 
 class Lecture(Base):
     __tablename__ = "lectures"
@@ -107,19 +119,20 @@ class Lecture(Base):
     def __repr__(self):
         return (f"Lecture(id={self.id}, title={self.title}, start_at={self.start_at}, end_at={self.end_at}, user_id={self.user_id}, skill_id={self.skill_id} ")
 
-
-engine = create_engine('sqlite:///app.db')
 Base.metadata.create_all(engine)
 
-session_factory = sessionmaker(bind=engine)
-
-
-def get_user(login: str, session=session_factory()):
+def add_user(session = session_factory(), **kwargs) -> (User | Exception):
+    new_user = User(**kwargs)
+    try:
+        session.add(new_user)
+    except Exception as err:
+        session.rollback()
+        return err
+    else:
+        session.commit()
+        new_user.add_auth(session)
+        return new_user
+    
+def get_user(login: str, session=session_factory()) -> (User | None):
     stmt = select(User).where(or_(User.username == login, User.email == login))
     return session.execute(stmt).scalars().first()
-
-def add_user(session = session_factory(), **kwargs) -> User:
-    new_user = User(**kwargs)
-    session.add(new_user)
-    session.commit()
-    return new_user
