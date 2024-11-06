@@ -4,6 +4,8 @@ from modules import db_classes as db
 if __name__ != "__main__":
     exit()
 
+session_state = {}
+
 def clear():
     os.system('cls' if os.name == 'nt' else 'echo -e \\\\033c')
 
@@ -26,7 +28,39 @@ def login():
 
     return result
 
-session_state = {}
+def register():
+    req_inputs = {
+        "field": ["first_name", "last_name", "email", "username", "password"],
+        "msg_suffix": ["vardą", "pavardę", "el.paštą", "vartotojo vardą", "slaptažodį"],
+        "unique": [False, False, True, True, False]
+    }
+
+    clear()
+    kwargs = {}
+    result = False
+
+    i = 0
+    n = len(req_inputs["field"])
+
+    while i < n:
+        clear()
+        user_input = input(f"Įveskite {req_inputs["msg_suffix"][i]}: ")
+
+        if user_input:
+            if req_inputs["unique"][i] and db.get_user(user_input):
+                input("Reikšmė ne unikali, toks vartotojas jau užsiregistravęs....")
+            else:
+                i+=1
+                kwargs[req_inputs["field"][i]] = user_input if req_inputs["field"][i] != "password" else calc_hash(user_input)
+
+
+    new_user = db.add_user(**kwargs)
+    if new_user:
+        session_state["auth_user"] = new_user
+        result = True
+
+    return result
+
 wellcome_hd_msg = "Sveiki atvyke į įgūdžių dalijimosi platformą"
 register_hd_msg = "Naujo vartotojo registracija"
 login_hd_msg = "Vartotojo prisijungimas"
@@ -34,6 +68,21 @@ login_hd_msg = "Vartotojo prisijungimas"
 action_msg = "Pasirinkite veiksmą:"
 input_msg = "Kokį veiksmą norite atlikti?: "
 exit_msg = "Baigti darbą"
+
+def profile_menu() -> None:
+    print("""
+1. Sukurkite savo įgudį (user) Skirmante Padaryta
+2. Sukurkite savo paskaitą (user, skill) Skirmante
+4. Mano paskaitų sarašas (user) Paulius
+5. Mano įgudžių sarašas (user) Paulius
+6. Mano reitingas (user) Raminta
+7. Užsiregistruok į paskaitą kurioje nori dalyvauti (paskaitų sarasas su laikais, destytojo reitingu) (user, lecture) Paulius , Ernestas
+8. Paskaitos į kurias prisiregistravęs, bet jos dar neprasidėjusios (user) Ramintai
+9. Paskaitos kuriose dalyvavau (išskirstytos - baigtos, nebaigtos). (user) Skirmante
+10. Įvertink paskaitas kuriose dalyvavai. (user, lecture) Skirmante Padaryta
+11. Baigti darba (atsijungti)  (atsijungimo metu paziureti ar dalyvauja ir ispeti jei taip, ar tikrai nori atsijungti.) (user) Raminta""")
+    input("Profile menu")
+    exit()
 
 def wellcome_menu() -> None:
     action = input(\
@@ -47,9 +96,11 @@ f"{wellcome_hd_msg}\n\
     clear()
     match action:
         case "1":
-            login()
+            if login():
+                profile_menu()
         case "2":
-            pass
+            if register():
+                profile_menu()
         case "3":
             print("Programa baigta!")
             exit()
@@ -57,16 +108,11 @@ f"{wellcome_hd_msg}\n\
             wellcome_menu()
     clear()
 
-def register_menu():
-    pass
-
 clear()
-
 while True:
 
     if "auth_user" in session_state:
-        print("Login successful")
-        break
+        profile_menu()
     else:
         wellcome_menu()
 
