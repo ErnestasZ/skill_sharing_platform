@@ -23,13 +23,18 @@ def get_user_compl_lecture(user):
     uncompleted = [cur for cur in courses if not cur.is_complete]
 
     for comp in completed:
-        print(f'Pabigtos paskaitos {comp.lecture.title} ')
+        print(f'Pabigtos paskaitos - {comp.lecture.title} ')
 
     for unc in uncompleted:
-        print(f'Nepabaigtos paskaitos {unc.lecture.title}')
+        print(f'Nepabaigtos paskaitos - {unc.lecture.title}')
 
 
 get_user_compl_lecture(user)
+
+# text = "prisijungti "
+# width = 25  # Dynamic width
+
+# print(f"{text:<{width}}[1]")
 # if courses:
 #     for cur in courses:
 #         print(f'Pabigtos paskaitose {cur.lecture.title}, {cur.is_complete} ')

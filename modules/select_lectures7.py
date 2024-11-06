@@ -1,6 +1,6 @@
 from datetime import datetime
-from db_classes import Lecture, engine, User, get_user
-from sqlalchemy import create_engine, select
+from db_classes import Lecture, engine, User, get_user, Participant
+from sqlalchemy import create_engine, select, func
 from sqlalchemy.orm import sessionmaker, selectinload
 
 Session = sessionmaker(bind=engine)
@@ -25,6 +25,35 @@ def get_lecture(lecture_id):
         return session.get(Lecture, lecture_id)
 
 
+def register_user_to_lecture(user, lecture):
+    # check if user not a teacher
+    if user.id == lecture.user_id:
+        print("Negalite dalyvauti savo paskaitoje. pasirink kita")
+        return False
+    # check if lecture has available place
+    with Session() as session:
+        participants_count = session.execute(
+            select(func.count(Participant.id))
+            .where(Participant.lecture_id == lecture.id)
+        ).scalar()
+
+    if participants_count >= lecture.participants_qty:
+        print("Paskaita neturi laisvų vietų, pasirink kitą")
+        return False
+
+    paticipant = Participant(
+        user_id=user.id,
+        lecture_id=lecture.id,
+        # is_complete=False,
+        # lecture_rating=False,
+        subscribed_at=datetime.now()
+    )
+    session.add(paticipant)
+    session.commit()
+    print("Į paskaitą užsiregistravai sėkmingai.")
+    return True
+
+
 def select_letures(user):
     print("Pasirinkite įgudžių paskaitą kurioje norite dalyvauti ir užsiregistruok: ")
     # all lectures avalable lectures by start_at
@@ -47,7 +76,7 @@ def select_letures(user):
                 print('Paskaita nerasta, pasirinkite paskaitos nr.')
                 continue
 
-            is_register = True  # take function
+            is_register = register_user_to_lecture(user, lecture)
             if not is_register:
                 continue
             print(f'paskaita: {lecture.title}')
