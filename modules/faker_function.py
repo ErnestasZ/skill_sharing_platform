@@ -6,7 +6,7 @@ from datetime import datetime, time, timedelta
 from sqlalchemy import create_engine, insert, select
 from sqlalchemy.orm import sessionmaker
 import db_classes as sql
-import hashlib #-JS
+import hashlib  # -JS
 
 
 salt = bcrypt.gensalt()
@@ -26,8 +26,9 @@ def create_users(number):
                 last_name=fake.last_name(),
                 username=fake.unique.user_name(),
                 email=fake.unique.email(),
-                password=hashlib.sha256(DEFAULT_PASSWORD.encode()).hexdigest() #-JS
-                #password=bcrypt.hashpw(DEFAULT_PASSWORD.encode(), salt) #-JS
+                password=hashlib.sha256(
+                    DEFAULT_PASSWORD.encode()).hexdigest()  # -JS
+                # password=bcrypt.hashpw(DEFAULT_PASSWORD.encode(), salt) #-JS
             )
 
             skill = create_skill()
@@ -88,7 +89,8 @@ def create_lecture(skill):
         title=lectures_title,
         description=fake.paragraph(nb_sentences=3),
         start_at=final_start_at,
-        end_at=final_start_at + timedelta(hours=random.randint(1, 4))
+        end_at=final_start_at + timedelta(hours=random.randint(1, 4)),
+        participants_qty=random.randint(10, 20)
     )
 
 
