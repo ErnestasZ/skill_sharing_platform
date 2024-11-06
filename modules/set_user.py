@@ -104,37 +104,60 @@ print(f"Password: {new_user.password}")
 #baigti darba
 
 
+# Session = sessionmaker(bind=db.engine)
+# session = Session()
+
+
+# def finish_work(user_id):
+#     ongoing_participation = session.query(db.Participant).join(db.Lecture).filter(
+#         db.Participant.user_id == user_id,
+#         db.Lecture.start_at <= datetime.now(),
+#         db.Lecture.end_at >= datetime.now(),
+#         db.Participant.is_complete == False  
+#     ).all()
+     
+#     if ongoing_participation:
+#         lecture_titles = [participation.lecture.title for participation in ongoing_participation]
+#         print(f"paskaitos kuriose dalyvaujama: {', '.join(lecture_titles)}.")
+#         confirm = input("Ar norite atsijungti? (y/n): ")  #yes, no
+        
+#         if confirm.lower() != 'y':
+#             print("Atsijungimas atšauktas.")
+#             return
+#         else:
+#             print("vykdo atsijungima") 
+
+# new_logout = db.Authorization(user_id=user_id, logout=datetime.now())
+# session.add(new_logout)
+# session.commit()
+# print("Vartotojas sėkmingai atsijungė.")
+
+# if __name__ == '__main__':
+#     user_id = 1  
+#     finish_work(user_id)
+
+
+
 Session = sessionmaker(bind=db.engine)
 session = Session()
 
+def count_rated_lectures():
+    positive_rated_lectures = session.query(db.Participant.lecture_id).filter(
+        db.Participant.lecture_rating == True
+    ).distinct().count()
 
-def finish_work(user_id):
-    ongoing_participation = session.query(db.Participant).join(db.Lecture).filter(
-        db.Participant.user_id == user_id,
-        db.Lecture.start_at <= datetime.now(),
-        db.Lecture.end_at >= datetime.now(),
-        db.Participant.is_complete == False  
-    ).all()
-     
-    if ongoing_participation:
-        lecture_titles = [participation.lecture.title for participation in ongoing_participation]
-        print(f"paskaitos kuriose dalyvaujama: {', '.join(lecture_titles)}.")
-        confirm = input("Ar norite atsijungti? (y/n): ")  #yes, no
-        
-        if confirm.lower() != 'y':
-            print("Atsijungimas atšauktas.")
-            return
-        else:
-            print("vykdo atsijungima") 
+    negative_rated_lectures = session.query(db.Participant.lecture_id).filter(
+        db.Participant.lecture_rating == False
+    ).distinct().count()
 
-new_logout = db.Authorization(user_id=user_id, logout=datetime.now())
-session.add(new_logout)
-session.commit()
-print("Vartotojas sėkmingai atsijungė.")
+    total_rated_lectures = positive_rated_lectures + negative_rated_lectures
 
-if __name__ == '__main__':
-    user_id = 1  
-    finish_work(user_id)
+    print(f"Paskaitu su teigiamais ivertinimais suma: {positive_rated_lectures}")
+    # print(f"Paskaitų su neigiamais vertinimais suma: {negative_rated_lectures}")
+    # print(f"Bendra  paskaitų suma: {total_rated_lectures}")
+
+    if __name__ == '__main__':
+        count_rated_lectures()
      
 
  

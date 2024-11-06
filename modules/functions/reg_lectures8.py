@@ -1,5 +1,5 @@
 from datetime import datetime
-from db_classes import Lecture, engine, User, get_user, Participant
+from ..db_classes import Lecture, engine, User, get_user, Participant
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker, selectinload
 
