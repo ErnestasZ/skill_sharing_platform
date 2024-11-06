@@ -79,26 +79,6 @@ action_msg = "Pasirinkite veiksmą:"
 input_msg = "Kokį veiksmą norite atlikti?: "
 exit_msg = "Baigti darbą"
 
-<<<<<<< HEAD
-def profile_menu() -> None:
-    print("""
-1. Sukurkite savo įgudį (user) Skirmante Padaryta
-2. Sukurkite savo paskaitą (user, skill) Skirmante
-4. Mano paskaitų sarašas (user) Paulius
-5. Mano įgudžių sarašas (user) Paulius
-6. Mano reitingas (user) Raminta
-7. Užsiregistruok į paskaitą kurioje nori dalyvauti (paskaitų sarasas su laikais, destytojo reitingu) (user, lecture) Paulius , Ernestas
-8. Paskaitos į kurias prisiregistravęs, bet jos dar neprasidėjusios (user) Ramintai
-9. Paskaitos kuriose dalyvavau (išskirstytos - baigtos, nebaigtos). (user) Skirmante
-10. Įvertink paskaitas kuriose dalyvavai. (user, lecture) Skirmante Padaryta
-11. Baigti darba (atsijungti)  (atsijungimo metu paziureti ar dalyvauja ir ispeti jei taip, ar tikrai nori atsijungti.) (user) Raminta""")
-    
-    last_auth = session_state["auth_user"].last_auth()
-    input("Profile menu")
-
-    exit()
-=======
-
 # def profile_menu() -> None:
 #     print("""
 # 1. Sukurkite savo įgudį (user) Skirmante Padaryta
@@ -113,8 +93,6 @@ def profile_menu() -> None:
 # 11. Baigti darba (atsijungti)  (atsijungimo metu paziureti ar dalyvauja ir ispeti jei taip, ar tikrai nori atsijungti.) (user) Raminta""")
 #     input("Profile menu")
 #     exit()
-
->>>>>>> 3a182f07ed3ce4dbd7e5d32b5869c6ed4a91353d
 
 def wellcome_menu() -> None:
     action = input(
