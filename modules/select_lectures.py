@@ -1,9 +1,34 @@
-aktyvuoti virtualę aplinka venv
-.\venv\Scripts\activate
+from datetime import datetime
+from db_classes import Lecture, engine, User
+from sqlalchemy import create_engine, select
+from sqlalchemy.orm import sessionmaker
 
-atsisiųsti įdiegtas bibliotekas
-pip install -r requirements.txt
+Session = sessionmaker(bind=engine)
 
+
+def select_letures(user):
+    print("Pasirinkite įgudžių paskaitą kurioje norite dalyvauti ir užsiregistruok :")
+    # all lectures avalable lectures by start_at
+    with Session() as session:
+        lectures = session.execute(select(Lecture).join(User).where(
+            Lecture.start_at < datetime.now())).scalars().all()
+
+        if lectures:
+            for lec in lectures:
+                print(f"""{lec.id}. {
+                      lec.title} - {lec.start_at.strftime('%Y-%m-%d %H:%M')}, dėsto: {lec.user.first_name}""")
+            while True:
+                lecture_id = input("Pasirinkite paskaitos nr.")
+                if not lecture_id and not lecture_id.isdigit():
+                    raise ValueError
+                    # find lecture
+                    pass
+                break
+
+        else:
+            print("Nėra galiojančių paskaitų.")
+
+        print(f"Pasirink paskaitos numerį: ")
 
 
 wellcome_hd_msg = "Sveiki atvyke į įgūdžių dalijimosi platformą"
