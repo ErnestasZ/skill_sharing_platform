@@ -1,5 +1,5 @@
 from datetime import datetime
-from db_classes import Lecture, engine, User, get_user, Participant
+from ..db_classes import Lecture, engine, User, get_user, Participant
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker, selectinload
 
@@ -29,7 +29,7 @@ def get_user_compl_lecture(user):
         print(f'Nepabaigtos paskaitos - {unc.lecture.title}')
 
 
-get_user_compl_lecture(user)
+# get_user_compl_lecture(user)
 
 # text = "prisijungti "
 # width = 25  # Dynamic width
